@@ -26,6 +26,7 @@ func TestNowPlaying(t *testing.T) {
 		response string
 	}{
 		{
+			// Air Break
 			response: "...air break...",
 			kexp: Kexp{Plays: []Play{
 				{
@@ -34,6 +35,7 @@ func TestNowPlaying(t *testing.T) {
 			}},
 		},
 		{
+			// Complete test
 			response: "Wandering Star by Portishead from Dummy :: released in 1994",
 			kexp: Kexp{
 				Plays: []Play{
@@ -48,6 +50,36 @@ func TestNowPlaying(t *testing.T) {
 				},
 			},
 		},
+		{
+			// Without a track name
+			response: "Lester Young from Good Time Blues :: released in 1998",
+			kexp: Kexp{
+				Plays: []Play{
+					{
+						Track:   Information{},
+						Artist:  Information{Name: "Lester Young"},
+						Release: Information{Name: "Good Time Blues"},
+						ReleaseEvent: ReleaseEvent{
+							Date: Date{Year: 1998},
+						},
+					},
+				},
+			},
+		},
+		{
+			// Without a release date
+			response: "Sunny Side of the Street by Coleman Hawkins from Good Time Blues",
+			kexp: Kexp{
+				Plays: []Play{
+					{
+						Track:        Information{Name: "Sunny Side of the Street"},
+						Artist:       Information{Name: "Coleman Hawkins"},
+						Release:      Information{Name: "Good Time Blues"},
+						ReleaseEvent: ReleaseEvent{},
+					},
+				},
+			},
+		},
 	} {
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			err := json.NewEncoder(w).Encode(tt.kexp)
@@ -58,6 +90,7 @@ func TestNowPlaying(t *testing.T) {
 
 		np, err := NowPlaying(srv.URL)
 		expectedNil(t, err)
+		expectedDeepEqual(t, len(np), 1)
 		expectedDeepEqual(t, np[0], tt.response)
 	}
 }

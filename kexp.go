@@ -51,6 +51,24 @@ type Play struct {
 	ReleaseEvent ReleaseEvent `json:"ReleaseEvent"`
 }
 
+// String returns a formated string with play information.
+func (p *Play) String() string {
+	if p.Track.Name == "" && p.Artist.Name == "" && p.Release.Name == "" {
+		return "...air break..."
+	}
+	if p.Track.Name == "" {
+		return fmt.Sprintf("%s from %s :: released in %d",
+			p.Artist.Name, p.Release.Name, p.ReleaseEvent.Date.Year)
+	}
+	if p.ReleaseEvent.Date.Year == 0 {
+		return fmt.Sprintf("%s by %s from %s",
+			p.Track.Name, p.Artist.Name, p.Release.Name)
+	}
+	return fmt.Sprintf("%s by %s from %s :: released in %d",
+		p.Track.Name, p.Artist.Name, p.Release.Name,
+		p.ReleaseEvent.Date.Year)
+}
+
 // Kexp describes what's now playing on KEXP.
 type Kexp struct {
 	Count        int    `json:"Count"`
@@ -89,14 +107,7 @@ func NowPlaying(host string) ([]string, error) {
 
 	var np []string
 	for _, play := range kexp.Plays {
-		if play.Track.Name == "" {
-			np = append(np, "...air break...")
-		} else {
-			s := fmt.Sprintf("%s by %s from %s :: released in %d",
-				play.Track.Name, play.Artist.Name, play.Release.Name,
-				play.ReleaseEvent.Date.Year)
-			np = append(np, s)
-		}
+		np = append(np, play.String())
 	}
 	return np, nil
 }
