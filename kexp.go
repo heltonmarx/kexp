@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 var (
@@ -89,7 +90,9 @@ func NowPlaying(host string) ([]string, error) {
 		return nil, err
 	}
 
-	conn := &http.Client{}
+	conn := &http.Client{
+		Timeout: 5 * time.Second,
+	}
 	resp, err := conn.Do(req)
 	if err != nil {
 		return nil, err
