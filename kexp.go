@@ -20,6 +20,11 @@ type Date struct {
 	Day   int `json:"Day"`
 }
 
+// IsZero returns true if release date of an album is zero.
+func (d Date) IsZero() bool {
+	return (d.Year == 0 && d.Month == 0 && d.Day == 0)
+}
+
 // ReleaseEvent describes the date and the country where the album was released.
 type ReleaseEvent struct {
 	Type    string `json:"__type"`
@@ -61,9 +66,12 @@ func (p *Play) String() string {
 		return fmt.Sprintf("%s from %s :: released in %d",
 			p.Artist.Name, p.Release.Name, p.ReleaseEvent.Date.Year)
 	}
-	if p.ReleaseEvent.Date.Year == 0 {
-		return fmt.Sprintf("%s by %s from %s",
-			p.Track.Name, p.Artist.Name, p.Release.Name)
+	if p.ReleaseEvent.Date.IsZero() {
+		if p.Release.Name != "" {
+			return fmt.Sprintf("%s by %s from %s",
+				p.Track.Name, p.Artist.Name, p.Release.Name)
+		}
+		return fmt.Sprintf("%s by %s", p.Track.Name, p.Artist.Name)
 	}
 	return fmt.Sprintf("%s by %s from %s :: released in %d",
 		p.Track.Name, p.Artist.Name, p.Release.Name,
